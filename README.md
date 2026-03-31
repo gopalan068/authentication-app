@@ -56,6 +56,3 @@ index.html         # Frontend (static, for GitHub Pages)
 2. Push `index.html` to the root of your GitHub repo
 3. Enable GitHub Pages (Settings → Pages → Source: main branch, root)
 4. Your app will be live at `https://YOUR_USERNAME.github.io/REPO_NAME/`
-
-## License
-MIT
