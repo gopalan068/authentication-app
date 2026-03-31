@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AuthApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f7f6f3;
+      --surface:  #ffffff;
+      --border:   #e4e2dc;
+      --text:     #1a1916;
+      --muted:    #888580;
+      --accent:   #2d2d2d;
+      --accent-h: #111111;
+      --error:    #c0392b;
+      --success:  #27ae60;
+      --radius:   10px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(0,0,0,0.025) 0%, transparent 55%),
+        radial-gradient(circle at 85% 85%, rgba(0,0,0,0.02) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* ── Auth Panel ─────────────────────────────────────────── */
+    #auth-panel {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .brand-mark {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .brand-mark svg { width: 18px; height: 18px; }
+
+    .brand-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 36px 30px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 28px rgba(0,0,0,0.05);
+    }
+
+    #form-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.7rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    #form-subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45,45,45,0.07);
+    }
+
+    input::placeholder { color: #c0bdb8; }
+
+    #error-msg {
+      font-size: 0.825rem;
+      color: var(--error);
+      min-height: 20px;
+      margin: 6px 0 2px;
+      animation: none;
+    }
+
+    #error-msg.shake {
+      animation: shake 0.3s ease;
+    }
+
+    #submit-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: background 0.15s, transform 0.1s, opacity 0.15s;
+      position: relative;
+    }
+
+    #submit-btn:hover:not(:disabled)  { background: var(--accent-h); }
+    #submit-btn:active:not(:disabled) { transform: scale(0.99); }
+    #submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    #toggle-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 20px;
+    }
+
+    #toggle-text a {
+      color: var(--text);
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: border-color 0.15s;
+    }
+
+    #toggle-text a:hover { border-color: var(--text); }
+
+    /* ── App Panel ─────────────────────────────────────────── */
+    #app-panel {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      max-width: 420px;
+      width: 100%;
+      padding: 20px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .app-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 28px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .avatar {
+      width: 52px; height: 52px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 1.2rem;
+    }
+
+    .app-card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .app-card .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 6px;
+    }
+
+    #user-email {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .meta {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-top: 4px;
+    }
+
+    #logout-btn {
+      padding: 10px 24px;
+      border: 1px solid var(--border);
+      background: transparent;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 24px;
+    }
+
+    #logout-btn:hover { border-color: var(--text); color: var(--text); }
+
+    /* ── Keyframes ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-5px); }
+      75%      { transform: translateX(5px); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .card, .app-card { padding: 28px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Auth Panel ── -->
+  <div id="auth-panel">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="7" r="3.5" stroke="white" stroke-width="1.5"/>
+          <path d="M2.5 16c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">AuthApp</span>
+    </div>
+
+    <div class="card">
+      <h1 id="form-title">Welcome back</h1>
+      <p id="form-subtitle">Sign in to your account</p>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+
+      <div id="error-msg"></div>
+
+      <button id="submit-btn">Sign in</button>
+
+      <p id="toggle-text">
+        No account? <a href="#" id="toggle-link">Create one</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── App Panel ── -->
+  <div id="app-panel">
+    <div class="app-card">
+      <div class="avatar">✦</div>
+      <h2>You're in.</h2>
+      <p class="subtitle">Signed in as <span id="user-email"></span></p>
+      <p class="meta" id="user-since"></p>
+      <button id="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <script>
+    // ── Config ────────────────────────────────────────────────────────────────
+    // 🔧 Replace this with your Render backend URL after deploying
+    const API_BASE = 'http://localhost:3000';
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const authPanel    = document.getElementById('auth-panel');
+    const appPanel     = document.getElementById('app-panel');
+    const emailInput   = document.getElementById('email');
+    const passInput    = document.getElementById('password');
+    const submitBtn    = document.getElementById('submit-btn');
+    const toggleLink   = document.getElementById('toggle-link');
+    const toggleText   = document.getElementById('toggle-text');
+    const errorMsg     = document.getElementById('error-msg');
+    const userEmailEl  = document.getElementById('user-email');
+    const userSinceEl  = document.getElementById('user-since');
+    const logoutBtn    = document.getElementById('logout-btn');
+    const formTitle    = document.getElementById('form-title');
+    const formSubtitle = document.getElementById('form-subtitle');
+
+    let isLogin = true;
+
+    // ── Check existing session on load ────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+
+      try {
+        const res  = await fetch(`${API_BASE}/api/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) showAppPanel(data.user);
+        else localStorage.removeItem('auth_token'); // token expired
+      } catch {
+        localStorage.removeItem('auth_token');
+      }
+    });
+
+    // ── Toggle login ↔ signup ─────────────────────────────────────────────────
+    toggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      isLogin = !isLogin;
+      clearError();
+
+      if (isLogin) {
+        formTitle.textContent    = 'Welcome back';
+        formSubtitle.textContent = 'Sign in to your account';
+        submitBtn.textContent    = 'Sign in';
+        toggleText.innerHTML     = `No account? <a href="#" id="toggle-link">Create one</a>`;
+      } else {
+        formTitle.textContent    = 'Create account';
+        formSubtitle.textContent = 'Get started — it\'s free';
+        submitBtn.textContent    = 'Create account';
+        toggleText.innerHTML     = `Already have one? <a href="#" id="toggle-link">Sign in</a>`;
+      }
+
+      document.getElementById('toggle-link').addEventListener('click', arguments.callee);
+    });
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    submitBtn.addEventListener('click', async () => {
+      const email    = emailInput.value.trim();
+      const password = passInput.value;
+      clearError();
+
+      if (!email || !password) { showError('Please fill in all fields.'); return; }
+
+      setLoading(true);
+
+      try {
+        const endpoint = isLogin ? '/api/login' : '/api/signup';
+        const res      = await fetch(`${API_BASE}${endpoint}`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Something went wrong.');
+          setLoading(false);
+          return;
+        }
+
+        // Store JWT in localStorage
+        localStorage.setItem('auth_token', data.token);
+        showAppPanel(data.user);
+
+      } catch (err) {
+        showError('Could not reach the server. Try again.');
+        setLoading(false);
+      }
+    });
+
+    // ── Logout ────────────────────────────────────────────────────────────────
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('auth_token');
+      appPanel.style.display  = 'none';
+      authPanel.style.display = 'flex';
+      emailInput.value = '';
+      passInput.value  = '';
+      setLoading(false);
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function showAppPanel(user) {
+      userEmailEl.textContent = user.email;
+      if (user.createdAt) {
+        const d = new Date(user.createdAt);
+        userSinceEl.textContent = `Member since ${d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}`;
+      }
+      authPanel.style.display = 'none';
+      appPanel.style.display  = 'flex';
+    }
+
+    function setLoading(on) {
+      submitBtn.disabled = on;
+      submitBtn.innerHTML = on
+        ? `<span class="spinner"></span>${isLogin ? 'Signing in…' : 'Creating…'}`
+        : (isLogin ? 'Sign in' : 'Create account');
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.remove('shake');
+      void errorMsg.offsetWidth;
+      errorMsg.classList.add('shake');
+    }
+
+    function clearError() {
+      errorMsg.textContent = '';
+      errorMsg.classList.remove('shake');
+    }
+
+    // Allow Enter key to submit
+    [emailInput, passInput].forEach(el => {
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+    });
+  </script>
+</body>
+</html>
