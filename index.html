@@ -42,7 +42,6 @@
       pointer-events: none;
     }
 
-    /* ── Auth Panel ─────────────────────────────────────────── */
     #auth-panel {
       width: 100%;
       max-width: 420px;
@@ -191,7 +190,6 @@
 
     #toggle-text a:hover { border-color: var(--text); }
 
-    /* ── App Panel ─────────────────────────────────────────── */
     #app-panel {
       display: none;
       flex-direction: column;
@@ -262,7 +260,6 @@
 
     #logout-btn:hover { border-color: var(--text); color: var(--text); }
 
-    /* ── Keyframes ─────────────────────────────────────────── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -285,7 +282,6 @@
 </head>
 <body>
 
-  <!-- ── Auth Panel ── -->
   <div id="auth-panel">
     <div class="brand">
       <div class="brand-mark">
@@ -321,7 +317,6 @@
     </div>
   </div>
 
-  <!-- ── App Panel ── -->
   <div id="app-panel">
     <div class="app-card">
       <div class="avatar">✦</div>
@@ -333,11 +328,8 @@
   </div>
 
   <script>
-    // ── Config ────────────────────────────────────────────────────────────────
-    // 🔧 Replace this with your Render backend URL after deploying
     const API_BASE = 'https://authentication-app-lxaw.onrender.com';
 
-    // ── DOM refs ──────────────────────────────────────────────────────────────
     const authPanel    = document.getElementById('auth-panel');
     const appPanel     = document.getElementById('app-panel');
     const emailInput   = document.getElementById('email');
@@ -354,7 +346,6 @@
 
     let isLogin = true;
 
-    // ── Check existing session on load ────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
@@ -365,13 +356,12 @@
         });
         const data = await res.json();
         if (res.ok) showAppPanel(data.user);
-        else localStorage.removeItem('auth_token'); // token expired
+        else localStorage.removeItem('auth_token');
       } catch {
         localStorage.removeItem('auth_token');
       }
     });
 
-    // ── Toggle login ↔ signup ─────────────────────────────────────────────────
     toggleLink.addEventListener('click', (e) => {
       e.preventDefault();
       isLogin = !isLogin;
@@ -392,7 +382,6 @@
       document.getElementById('toggle-link').addEventListener('click', arguments.callee);
     });
 
-    // ── Submit ────────────────────────────────────────────────────────────────
     submitBtn.addEventListener('click', async () => {
       const email    = emailInput.value.trim();
       const password = passInput.value;
@@ -418,7 +407,6 @@
           return;
         }
 
-        // Store JWT in localStorage
         localStorage.setItem('auth_token', data.token);
         showAppPanel(data.user);
 
@@ -428,7 +416,6 @@
       }
     });
 
-    // ── Logout ────────────────────────────────────────────────────────────────
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('auth_token');
       appPanel.style.display  = 'none';
@@ -438,7 +425,6 @@
       setLoading(false);
     });
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     function showAppPanel(user) {
       userEmailEl.textContent = user.email;
       if (user.createdAt) {
@@ -468,7 +454,6 @@
       errorMsg.classList.remove('shake');
     }
 
-    // Allow Enter key to submit
     [emailInput, passInput].forEach(el => {
       el.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
     });
